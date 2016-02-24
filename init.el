@@ -1,6 +1,5 @@
 ;; UI
 
-
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (menu-bar-mode -1)
@@ -10,7 +9,16 @@
 (require 'package)
 
 ;; Set a list of packages to install
-(setq package-list '(evil paredit evil-paredit rainbow-delimiters yaml-mode ack))
+(setq package-list '(
+		     ;; evil and friends
+		     evil evil-tabs
+		     ;; paredit
+		     paredit evil-paredit
+		     ;; editing niceness
+		     rainbow-delimiters yaml-mode
+		     ;; programming tools
+		     ack
+		     ))
 
 ;; Setting up the package archives
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
@@ -32,6 +40,18 @@
 
 ;; Evil: enabled everywhere, all the time, no exceptions.
 (evil-mode 1)
+;; make escape quit all the things
+(define-key evil-normal-state-map [escape] 'keyboard-quit)
+(define-key evil-visual-state-map [escape] 'keyboard-quit)
+(define-key minibuffer-local-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-ns-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
+;; fine-grain undo
+(setq evil-want-fine-undo t)
+;; add support for vim-style tabs
+(global-evil-tabs-mode t)
 
 ;; Rainbow delimiters: enabled everywhere, all the time, no exceptions.
 ;; for some reason, this requires a prog-mode hook rather than just a
