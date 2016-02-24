@@ -1,13 +1,16 @@
 ;; UI
+
+
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 
 ;; Packaging
+
 (require 'package)
 
 ;; Set a list of packages to install
-(setq package-list '(evil paredit evil-paredit rainbow-delimiters))
+(setq package-list '(evil paredit evil-paredit rainbow-delimiters yaml-mode ack))
 
 ;; Setting up the package archives
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
@@ -26,6 +29,7 @@
  package-list)
 
 ;; Package setups
+
 ;; Evil: enabled everywhere, all the time, no exceptions.
 (evil-mode 1)
 
@@ -39,3 +43,36 @@
 ;; certain contexts, which is really too bad.
 (add-hook 'emacs-lisp-mode-hook #'enable-paredit-mode)
 
+;; Custom functions
+
+;; better shell popup. bound in evil mode keymap, as well as globally
+(defun my/shell ()
+  "Does a 'popup' shell whenever eshell is called."
+  (interactive)
+  (split-window)
+  (other-window 1)
+  (eshell)
+  (other-window 1))
+
+;; Keymap modifications
+
+;; bind my/shell to c-backtick
+(define-key global-map (kbd "C-`") 'my/shell)
+
+;; Other things
+
+;; move all those backups to one place, and make emacs back up EVERYTHING
+(setq backup-directory-alist '(("." . "~/.emacs.d/backup")))
+(setq delete-old-versions -1)
+(setq version-control t)
+(setq vc-make-backup-files t)
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+
+;; enable file history
+(setq savehist-file "~/.emacs.d/savehist")
+(savehist-mode 1)
+(setq history-length t)
+(setq history-delete-duplicates t)
+
+;; make sentences behave the vim (and everyone else) way
+(setq sentence-end-double-space nil)
