@@ -1,8 +1,11 @@
 ;; UI
 
+;; the UI is for looooosers
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (menu-bar-mode -1)
+;; And the bell is annoying as hell
+(setq ring-bell-function 'ignore)
 
 ;; Packaging
 
