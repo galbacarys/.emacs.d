@@ -44,6 +44,7 @@
 ;; Evil: enabled everywhere, all the time, no exceptions.
 (evil-mode 1)
 ;; make escape quit all the things
+(require 'delsel) ; makes minibuffer-keyboard-quit work??
 (define-key evil-normal-state-map [escape] 'keyboard-quit)
 (define-key evil-visual-state-map [escape] 'keyboard-quit)
 (define-key minibuffer-local-map [escape] 'minibuffer-keyboard-quit)
