@@ -11,6 +11,8 @@
 (menu-bar-mode -1)
 ;; And the bell is annoying as hell
 (setq ring-bell-function 'ignore)
+;; Add a clock to the modeline since I usually go fullscreen
+(display-time-mode 1)
 
 ;; Packaging
 
@@ -23,15 +25,23 @@
 		     ;; paredit
 		     paredit evil-paredit
 		     ;; editing niceness
-		     rainbow-delimiters yaml-mode
+		     rainbow-delimiters yaml-mode lua-mode
 		     ;; programming tools
 		     ack company neotree
 		     ;; Flycheck and friends
 		     flycheck
 		     ;; org-mode
 		     org evil-org
+		     ;; helm and friends
+		     helm helm-projectile helm-ag
+		     ;;projectile
+		     projectile
 		     ;; pretties
 		     solarized-theme
+		     ;; an awesome reading tool
+		     spray
+		     ;; good for learning keybindings
+		     which-key
 		     ))
 
 ;; Setting up the package archives
@@ -43,7 +53,7 @@
 ;; If we don't have a package cache, refresh it
 (package-refresh-contents)
 
-;; make sure all packages are installed properly
+;; make sure all packages are installed
 (mapc
  (lambda (package)
    (or (package-installed-p package)
@@ -88,18 +98,55 @@
 (add-hook 'emacs-lisp-mode-hook #'enable-paredit-mode)
 
 ;; Flycheck
-;; Basically, just run the thing I think
 (add-hook 'after-init-hook #'global-flycheck-mode)
 
 ;; company-mode
 ;; add a hook for after global init, like flycheck
 (add-hook 'after-init-hook 'global-company-mode)
 
+;; spray
+(require 'spray)
+;; disable evil when using spray
+(defadvice spray-mode (after toggle-evil activate)
+  (evil-local-mode (if spray-mode -1 1)))
+
+;; which-key
+(require 'which-key)
+(which-key-mode)
+(setq which-key-idle-delay .5)
+(which-key-declare-prefixes "<SPC>t" "toggles")
+(which-key-declare-prefixes "<SPC>b" "buffer-mgmt")
+(which-key-declare-prefixes "<SPC>w" "windowing")
+(which-key-declare-prefixes "<SPC>r" "reading")
+(which-key-declare-prefixes "<SPC>f" "files")
+(which-key-declare-prefixes "<SPC>p" "projectile")
+
+;; helm
+(require 'helm)
+(require 'helm-config)
+;; we'll add the helm prefix to evil-leader for fun and profit
+(global-unset-key (kbd "C-x c")) ;; because this is a stupid keybinding
+(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
+(define-key helm-map (kbd "C-i") 'helm-execute-persistent-action)
+(define-key helm-map (kbd "C-z") 'helm-select-action)
+(define-key evil-normal-state-map (kbd "M-x") 'helm-M-x)
+(define-key evil-normal-state-map (kbd "C-x C-f") 'helm-find-files)
+(define-key evil-normal-state-map (kbd "C-x b") 'helm-mini)
+
+;; helm-ag
+(require 'helm-ag)
+(custom-set-variables '(helm-ag-base-command "ack --nocolor --nogroup"))
+
+;; projectile
+(require 'projectile)
+(projectile-global-mode)
+(setq projectile-completion-system 'helm)
+(helm-projectile-on)
 
 ;;; Custom functions
 
 ;; better shell popup. bound in evil mode keymap, as well as globally
-;; TODO figure out a way to make it auto-close when I leave the buffer
+;; TODO figure out a way to  make it auto-close when I leave the buffer
 ;; or maybe even toggle like Spacemacs' spc-'
 (defun my/shell ()
   "Does a 'popup' shell whenever eshell is called."
@@ -109,12 +156,6 @@
   (eshell)
   (other-window 1))
 
-
-;;; Keymap modifications
-
-;; bind my/shell to c-backtick
-(define-key global-map (kbd "C-`") 'my/shell)
-
 ;; evil-leader keymap mods
 ;; toggles
 (evil-leader/set-key "tt" 'neotree-toggle)
@@ -123,6 +164,8 @@
 (evil-leader/set-key "bp" 'previous-buffer)
 (evil-leader/set-key "bn" 'next-buffer)
 (evil-leader/set-key "bt" 'switch-to-buffer)
+(evil-leader/set-key "bb" 'helm-mini)
+(evil-leader/set-key "be" 'eval-buffer)
 ;; windowing events
 (evil-leader/set-key "wh" 'evil-window-left)
 (evil-leader/set-key "wj" 'evil-window-down)
@@ -130,6 +173,15 @@
 (evil-leader/set-key "wl" 'evil-window-right)
 (evil-leader/set-key "wo" 'other-frame)
 (evil-leader/set-key "wn" 'make-frame)
+(evil-leader/set-key "rs" 'spray-mode)
+(evil-leader/set-key "'" 'my/shell)
+;; helm stuff
+(evil-leader/set-key "ff" 'helm-find-files)
+(evil-leader/set-key "fa" 'helm-ag)
+(evil-leader/set-key "fA" 'helm-ag-this-file)
+;; projectile remaps
+(evil-leader/set-key "pa" 'projectile-ag)
+(evil-leader/set-key "pf" 'projectile-find-file)
 
 ;; fix the keybindings inside neotree
 (add-hook 'neotree-mode-hook
@@ -137,6 +189,7 @@
 	    (define-key evil-normal-state-local-map (kbd "TAB") 'neotree-enter)
 	    (define-key evil-normal-state-local-map (kbd "RET") 'neotree-enter)
 	    (define-key evil-normal-state-local-map (kbd "I") 'neotree-hidden-file-toggle)
+	    (define-key evil-normal-state-local-map (kbd "r") 'neotree-change-root)
 	    (define-key evil-normal-state-local-map (kbd "R") 'neotree-refresh)))
 
 
@@ -158,18 +211,6 @@
 ;; make sentences behave the vim (and everyone else) way
 (setq sentence-end-double-space nil)
 
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+;; set up the theme
+(require 'solarized-theme)
+(load-theme 'solarized-dark t)
