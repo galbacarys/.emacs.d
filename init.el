@@ -77,6 +77,7 @@
 (define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
 (define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
 (define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
+(require 'evil-org)
 
 ;; neotree
 (require 'neotree)
@@ -120,6 +121,7 @@
 (which-key-declare-prefixes "<SPC>r" "reading")
 (which-key-declare-prefixes "<SPC>f" "files")
 (which-key-declare-prefixes "<SPC>p" "projectile")
+(which-key-declare-prefixes "<SPC>r" "org-clocks")
 
 ;; helm
 (require 'helm)
@@ -135,13 +137,17 @@
 
 ;; helm-ag
 (require 'helm-ag)
-(custom-set-variables '(helm-ag-base-command "ack --nocolor --nogroup"))
 
 ;; projectile
 (require 'projectile)
 (projectile-global-mode)
 (setq projectile-completion-system 'helm)
 (helm-projectile-on)
+
+;; org customization
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "RESEARCH(r@)" "BLOCKED(b@)" "INPROGRESS(p!)" "|" "DONE(d!)" "DROPPED(x@)")))
+(setq org-default-notes-file "~/org/todo.org")
 
 ;;; Custom functions
 
@@ -156,10 +162,22 @@
   (eshell)
   (other-window 1))
 
+;; emacs custom set variables
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default)))
+ '(helm-ag-base-command "ack --nocolor --nogroup"))
+
 ;; evil-leader keymap mods
 ;; toggles
 (evil-leader/set-key "tt" 'neotree-toggle)
 (evil-leader/set-key "tu" 'undo-tree-visualize)
+(evil-leader/set-key "tl" 'toggle-truncate-lines)
 ;; buffers
 (evil-leader/set-key "bp" 'previous-buffer)
 (evil-leader/set-key "bn" 'next-buffer)
@@ -182,6 +200,18 @@
 ;; projectile remaps
 (evil-leader/set-key "pa" 'projectile-ag)
 (evil-leader/set-key "pf" 'projectile-find-file)
+;; org stuff
+(evil-leader/set-key "rc" 'org-clock-in) 
+(evil-leader/set-key "rC" 'org-clock-out) 
+(evil-leader/set-key "rl" 'org-clock-in-last) 
+(evil-leader/set-key "re" 'org-clock-modify-effort-estimate)
+(evil-leader/set-key "rj" 'org-clock-timestamps-down)
+(evil-leader/set-key "rk" 'org-clock-timestamps-up)
+(evil-leader/set-key "rq" 'org-clock-cancel)
+(evil-leader/set-key "rj" 'org-clock-goto)
+(evil-leader/set-key "rd" 'org-clock-display)
+;; org capture
+(evil-leader/set-key "C" 'org-capture)
 
 ;; fix the keybindings inside neotree
 (add-hook 'neotree-mode-hook
@@ -214,3 +244,9 @@
 ;; set up the theme
 (require 'solarized-theme)
 (load-theme 'solarized-dark t)
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
